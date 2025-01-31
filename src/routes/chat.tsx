@@ -17,27 +17,9 @@ export const Route = createFileRoute("/chat")({
   component: ChatInterface,
 })
 
-const drawerWidth = 240
-const collapsedDrawerWidth = 64
-
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean
-}>(({ theme }) => ({
+const Main = styled("main")(({ theme }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginLeft: 0,
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: `${drawerWidth}px`,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
 }))
 
 const availableUsers = ["John", "Alice", "Bob", "Emma", "David"]
@@ -77,27 +59,14 @@ export default function ChatInterface() {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
     }
-  }, [chatWindowRef]) //Corrected dependency
+  }, [chatWindowRef])
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: "flex" ,bgcolor:red}}>
+      <Box sx={{ display: "flex", bgcolor: red }}>
         <SideBar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
-        <Main
-          sx={{
-            marginLeft: {
-              sm: `${isCollapsed ? collapsedDrawerWidth : drawerWidth}px`,
-            },
-            width: {
-              sm: `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`,
-            },
-            display: "flex",
-            flexDirection: "column",
-            alignItems: `center`,
-            bgcolor: yellow
-          }}
-        >
+        <Main>
           <Toolbar />
           <Box
             sx={{
@@ -108,6 +77,7 @@ export default function ChatInterface() {
               alignItems: "center",
               height: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - ${theme.spacing(6)})`,
               mt: 3,
+              mx: "auto",
             }}
           >
             <Box
@@ -149,11 +119,9 @@ export default function ChatInterface() {
             <Box sx={{ width: "100%", mt: 2 }}>
               <MessageInput onSendMessage={handleSendMessage} availableUsers={availableUsers} />
             </Box>
-     
           </Box>
         </Main>
       </Box>
     </ThemeProvider>
   )
 }
-
