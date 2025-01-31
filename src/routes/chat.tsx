@@ -1,75 +1,115 @@
-﻿"use client"
-
-import { useState } from "react"
-import { ThemeProvider, createTheme } from "@mui/material/styles"
-import CssBaseline from "@mui/material/CssBaseline"
+﻿import { useState } from "react"
+import { styled } from "@mui/material/styles"
 import Box from "@mui/material/Box"
-import Container from "@mui/material/Container"
 import Typography from "@mui/material/Typography"
-import Paper from "@mui/material/Paper"
-import { ChatWindow } from "@/components/ChatWindow"
-import { MessageInput } from "@/components/MessageInput"
-import { createFileRoute } from '@tanstack/react-router'
+import SyncIcon from "@mui/icons-material/Sync"
+import { ThemeProvider } from "@mui/material/styles"
+import CssBaseline from "@mui/material/CssBaseline"
+import { createFileRoute } from "@tanstack/react-router"
+import { theme } from "@/themes/theme"
+import Sidebar from "@/components/SideBar"
+import PromptSuggestions from "@/components/PromptSuggestions"
+import ChatInput from "@/components/ChatInput"
+import Toolbar from "@mui/material/Toolbar" // Import Toolbar
 
 export const Route = createFileRoute("/chat")({
-  component: ChatPortal
+  component: ChatInterface,
 })
 
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#3f51b5",
-    },
-    secondary: {
-      main: "#f50057",
-    },
+const drawerWidth = 240
+
+const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
+  open?: boolean
+}>(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create("margin", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: 0,
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: `${drawerWidth}px`,
+    width: `calc(100% - ${drawerWidth}px)`,
   },
-})
+}))
 
-export const Rotue = createFileRoute("/chat")({
-    component: ChatPortal
-})
+const prompts = [
+  "Clean account fields",
+  "Clean contact fields",
+  "Create master 'People' list",
+  "Account Fit Score",
+  "Match leads to account",
+  "See prompt library",
+]
 
-export default function ChatPortal() {
-  const [messages, setMessages] = useState<Array<{ id: number; text: string; sender: string; attachments?: string[] }>>(
-    [],
-  )
+export default function ChatInterface() {
+  const [input, setInput] = useState("")
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  const handleSendMessage = (text: string, attachments: string[] = []) => {
-    const newMessage = {
-      id: Date.now(),
-      text,
-      sender: "user",
-      attachments,
-    }
-    setMessages((prevMessages) => [...prevMessages, newMessage])
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = {
-        id: Date.now(),
-        text: `AI feedback based on ${text}`,
-        sender: "ai",
-      }
-      setMessages((prevMessages) => [...prevMessages, aiResponse])
-    }, 1000)
+  const handleSend = () => {
+    console.log("Sending message:", input)
+    setInput("")
   }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="md">
-        <Box sx={{ my: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            DesignManager Chat Portal
-          </Typography>
-          <Paper elevation={3} sx={{ p: 2, height: "80vh", display: "flex", flexDirection: "column" }}>
-            <ChatWindow messages={messages} />
-            <MessageInput onSendMessage={handleSendMessage} />
-          </Paper>
-        </Box>
-      </Container>
+      <Box sx={{ display: "flex" }}>
+        <Sidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
+        <Main>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: { sm: `calc(100% - ${drawerWidth}px)` },
+            }}
+          >
+            <Toolbar /> {/* Toolbar is now used here */}
+            <Box
+              sx={{
+                maxWidth: "md",
+                mx: "auto",
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                pt: { xs: 4, sm: 6 },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 4,
+                  bgcolor: "primary.light",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 3,
+                }}
+              >
+                <SyncIcon sx={{ fontSize: 40, color: "primary.main" }} />
+              </Box>
+
+              <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: "bold" }}>
+                Talk Data to Me
+              </Typography>
+              <Typography color="text.secondary" align="center" sx={{ mb: 6, maxWidth: "sm" }}>
+                Choose a prompt below or write your own to start chatting with Seam
+              </Typography>
+
+              <PromptSuggestions prompts={prompts} onSelectPrompt={setInput} />
+              <ChatInput input={input} onInputChange={setInput} onSend={handleSend} />
+            </Box>
+          </Box>
+        </Main>
+      </Box>
     </ThemeProvider>
   )
 }
