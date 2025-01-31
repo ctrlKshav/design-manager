@@ -1,4 +1,5 @@
 ﻿import type React from "react"
+import { useState } from "react"
 import Box from "@mui/material/Box"
 import Drawer from "@mui/material/Drawer"
 import AppBar from "@mui/material/AppBar"
@@ -9,6 +10,7 @@ import Divider from "@mui/material/Divider"
 import IconButton from "@mui/material/IconButton"
 import MenuIcon from "@mui/icons-material/Menu"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import ListItem from "@mui/material/ListItem"
 import ListItemButton from "@mui/material/ListItemButton"
 import ListItemIcon from "@mui/material/ListItemIcon"
@@ -21,35 +23,55 @@ import { useTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
 
 const drawerWidth = 240
+const collapsedDrawerWidth = 64
 
-interface SidebarProps {
+interface SideBarProps {
   mobileOpen: boolean
   handleDrawerToggle: () => void
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => {
+const SideBar: React.FC<SideBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  const handleCollapseToggle = () => {
+    if (!isMobile) {
+      setIsCollapsed(!isCollapsed)
+    }
+  }
 
   const drawer = (
     <>
       <Toolbar>
-        <IconButton onClick={handleDrawerToggle}>
-          <ChevronLeftIcon />
+        <IconButton onClick={isMobile ? handleDrawerToggle : handleCollapseToggle}>
+          {isMobile ? <ChevronLeftIcon /> : isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
         </IconButton>
       </Toolbar>
       <Divider />
       <List>
         {["Home", "Sync", "Users", "Settings"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
+          <ListItem key={text} disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+              sx={{
+                minHeight: 48,
+                justifyContent: isCollapsed && !isMobile ? "center" : "initial",
+                px: 2.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: isCollapsed && !isMobile ? "auto" : 3,
+                  justifyContent: "center",
+                }}
+              >
                 {index === 0 && <HomeIcon />}
                 {index === 1 && <SyncIcon />}
                 {index === 2 && <GroupIcon />}
                 {index === 3 && <SettingsIcon />}
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={text} sx={{ opacity: isCollapsed && !isMobile ? 0 : 1 }} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -62,8 +84,8 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => 
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { sm: `calc(100% - ${isCollapsed && !isMobile ? collapsedDrawerWidth : drawerWidth}px)` },
+          ml: { sm: `${isCollapsed && !isMobile ? collapsedDrawerWidth : drawerWidth}px` },
         }}
       >
         <Toolbar>
@@ -81,7 +103,11 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => 
           </Typography>
         </Toolbar>
       </AppBar>
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }} aria-label="mailbox folders">
+      <Box
+        component="nav"
+        sx={{ width: { sm: isCollapsed && !isMobile ? collapsedDrawerWidth : drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
         {isMobile ? (
           <Drawer
             variant="temporary"
@@ -102,7 +128,14 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => 
             variant="permanent"
             sx={{
               display: { xs: "none", sm: "block" },
-              "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: isCollapsed ? collapsedDrawerWidth : drawerWidth,
+                transition: theme.transitions.create("width", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
+              },
             }}
             open
           >
@@ -114,5 +147,5 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => 
   )
 }
 
-export default Sidebar
+export default SideBar
 

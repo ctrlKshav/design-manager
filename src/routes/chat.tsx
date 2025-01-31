@@ -7,16 +7,17 @@ import { ThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import { createFileRoute } from "@tanstack/react-router"
 import { theme } from "@/themes/theme"
-import Sidebar from "@/components/SideBar"
+import SideBar from "@/components/SideBar"
 import PromptSuggestions from "@/components/PromptSuggestions"
 import ChatInput from "@/components/ChatInput"
-import Toolbar from "@mui/material/Toolbar" // Import Toolbar
+import Toolbar from "@mui/material/Toolbar"
 
 export const Route = createFileRoute("/chat")({
   component: ChatInterface,
 })
 
 const drawerWidth = 240
+const collapsedDrawerWidth = 64
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   open?: boolean
@@ -31,6 +32,10 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   [theme.breakpoints.up("sm")]: {
     marginLeft: `${drawerWidth}px`,
     width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
 }))
 
@@ -46,6 +51,7 @@ const prompts = [
 export default function ChatInterface() {
   const [input, setInput] = useState("")
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -60,17 +66,26 @@ export default function ChatInterface() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: "flex" }}>
-        <Sidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
-        <Main>
+        <SideBar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
+        <Main
+          sx={{
+            marginLeft: {
+              sm: `${isCollapsed ? collapsedDrawerWidth : drawerWidth}px`,
+            },
+            width: {
+              sm: `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`,
+            },
+          }}
+        >
           <Box
             component="main"
             sx={{
               flexGrow: 1,
               p: 3,
-              width: { sm: `calc(100% - ${drawerWidth}px)` },
+              width: { sm: `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)` },
             }}
           >
-            <Toolbar /> {/* Toolbar is now used here */}
+            <Toolbar />
             <Box
               sx={{
                 maxWidth: "md",
