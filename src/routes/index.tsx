@@ -10,6 +10,8 @@ function HomeComponent() {
     <div className="p-2">
       <h3>Welcome Home!</h3>
       <Link to='/chat'>ChatBot</Link>
+      <br />
+      <Link to='/newChat'>NewChatBot</Link>
     </div>
   )
 }
