@@ -6,22 +6,24 @@ import Button from "@mui/material/Button"
 import IconButton from "@mui/material/IconButton"
 import AttachFileIcon from "@mui/icons-material/AttachFile"
 import Chip from "@mui/material/Chip"
+import Autocomplete from "@mui/material/Autocomplete"
 
 interface MessageInputProps {
-  onSendMessage: (text: string, attachments: string[]) => void
+  onSendMessage: (text: string, attachments: string[], taggedUsers: string[]) => void
+  availableUsers: string[]
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, availableUsers }) => {
   const [message, setMessage] = useState("")
   const [attachments, setAttachments] = useState<string[]>([])
-  const [tags, setTags] = useState<string[]>([])
+  const [taggedUsers, setTaggedUsers] = useState<string[]>([])
 
   const handleSend = () => {
     if (message.trim() || attachments.length > 0) {
-      onSendMessage(message, attachments)
+      onSendMessage(message, attachments, taggedUsers)
       setMessage("")
       setAttachments([])
-      setTags([])
+      setTaggedUsers([])
     }
   }
 
@@ -31,20 +33,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
       const newAttachments = Array.from(files).map((file) => file.name)
       setAttachments((prev) => [...prev, ...newAttachments])
     }
-  }
-
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "@") {
-      // Simulate tag suggestion
-      setTimeout(() => {
-        setTags(["John", "Alice", "Bob"])
-      }, 100)
-    }
-  }
-
-  const handleTagClick = (tag: string) => {
-    setMessage((prev) => prev + tag + " ")
-    setTags([])
   }
 
   return (
@@ -61,6 +49,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
           />
         ))}
       </Box>
+      <Autocomplete
+        multiple
+        id="tags-standard"
+        options={availableUsers}
+        value={taggedUsers}
+        onChange={(event, newValue) => {
+          setTaggedUsers(newValue)
+        }}
+        renderInput={(params) => <TextField {...params} variant="standard" label="Tag Users" placeholder="Tag users" />}
+        sx={{ mb: 2 }}
+      />
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <TextField
           fullWidth
@@ -68,7 +67,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
           placeholder="Type your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
         />
         <input
           accept="image/*"
@@ -87,13 +85,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
           Send
         </Button>
       </Box>
-      {tags.length > 0 && (
-        <Box sx={{ display: "flex", mt: 1 }}>
-          {tags.map((tag) => (
-            <Chip key={tag} label={tag} onClick={() => handleTagClick(tag)} sx={{ mr: 1 }} />
-          ))}
-        </Box>
-      )}
     </Box>
   )
 }

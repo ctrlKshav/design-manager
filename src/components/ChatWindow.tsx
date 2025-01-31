@@ -2,6 +2,7 @@
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import Avatar from "@mui/material/Avatar"
+import Chip from "@mui/material/Chip"
 import { deepOrange, deepPurple } from "@mui/material/colors"
 
 interface Message {
@@ -9,6 +10,7 @@ interface Message {
   text: string
   sender: string
   attachments?: string[]
+  taggedUsers?: string[]
 }
 
 interface ChatWindowProps {
@@ -17,7 +19,7 @@ interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
   return (
-    <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2 }}>
+    <Box sx={{ p: 2 }}>
       {messages.map((message) => (
         <Box
           key={message.id}
@@ -44,6 +46,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
                     <Typography key={index} variant="body2" color="text.secondary">
                       Attachment: {attachment}
                     </Typography>
+                  ))}
+                </Box>
+              )}
+              {message.taggedUsers && message.taggedUsers.length > 0 && (
+                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {message.taggedUsers.map((user, index) => (
+                    <Chip key={index} label={user} size="small" />
                   ))}
                 </Box>
               )}

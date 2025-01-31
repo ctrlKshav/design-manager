@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+﻿import { useState, useRef, useEffect } from "react"
 import { styled } from "@mui/material/styles"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
@@ -8,9 +8,10 @@ import CssBaseline from "@mui/material/CssBaseline"
 import { createFileRoute } from "@tanstack/react-router"
 import { theme } from "@/themes/theme"
 import SideBar from "@/components/SideBar"
-import PromptSuggestions from "@/components/PromptSuggestions"
-import ChatInput from "@/components/ChatInput"
 import Toolbar from "@mui/material/Toolbar"
+import { ChatWindow } from "@/components/ChatWindow"
+import { MessageInput } from "@/components/MessageInput"
+import { red, yellow } from "@mui/material/colors"
 
 export const Route = createFileRoute("/chat")({
   component: ChatInterface,
@@ -39,33 +40,49 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   },
 }))
 
-const prompts = [
-  "Clean account fields",
-  "Clean contact fields",
-  "Create master 'People' list",
-  "Account Fit Score",
-  "Match leads to account",
-  "See prompt library",
-]
+const availableUsers = ["John", "Alice", "Bob", "Emma", "David"]
 
 export default function ChatInterface() {
-  const [input, setInput] = useState("")
+  const [messages, setMessages] = useState<any[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const chatWindowRef = useRef<HTMLDivElement>(null)
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
 
-  const handleSend = () => {
-    console.log("Sending message:", input)
-    setInput("")
+  const handleSendMessage = (text: string, attachments: string[], taggedUsers: string[]) => {
+    const newMessage = {
+      id: messages.length + 1,
+      text,
+      sender: "user",
+      attachments,
+      taggedUsers,
+    }
+    setMessages([...messages, newMessage])
+
+    // Simulate AI response
+    setTimeout(() => {
+      const aiResponse = {
+        id: messages.length + 2,
+        text: `AI response to: ${text}`,
+        sender: "ai",
+      }
+      setMessages((prevMessages) => [...prevMessages, aiResponse])
+    }, 1000)
   }
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
+    }
+  }, [chatWindowRef]) //Corrected dependency
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex" ,bgcolor:red}}>
         <SideBar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
         <Main
           sx={{
@@ -75,53 +92,64 @@ export default function ChatInterface() {
             width: {
               sm: `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`,
             },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: `center`,
+            bgcolor: yellow
           }}
         >
+          <Toolbar />
           <Box
-            component="main"
             sx={{
-              flexGrow: 1,
-              p: 3,
-              width: { sm: `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)` },
+              maxWidth: "800px",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              height: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - ${theme.spacing(6)})`,
+              mt: 3,
             }}
           >
-            <Toolbar />
             <Box
               sx={{
-                maxWidth: "md",
-                mx: "auto",
-                width: "100%",
+                width: 80,
+                height: 80,
+                borderRadius: 4,
+                bgcolor: "primary.light",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                pt: { xs: 4, sm: 6 },
+                justifyContent: "center",
+                mb: 3,
               }}
             >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 4,
-                  bgcolor: "primary.light",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  mb: 3,
-                }}
-              >
-                <SyncIcon sx={{ fontSize: 40, color: "primary.main" }} />
-              </Box>
-
-              <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: "bold" }}>
-                Talk Data to Me
-              </Typography>
-              <Typography color="text.secondary" align="center" sx={{ mb: 6, maxWidth: "sm" }}>
-                Choose a prompt below or write your own to start chatting with Seam
-              </Typography>
-
-              <PromptSuggestions prompts={prompts} onSelectPrompt={setInput} />
-              <ChatInput input={input} onInputChange={setInput} onSend={handleSend} />
+              <SyncIcon sx={{ fontSize: 40, color: "primary.main" }} />
             </Box>
+
+            <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: "bold" }}>
+              Design Manager Chat
+            </Typography>
+            <Typography color="text.secondary" align="center" sx={{ mb: 3, maxWidth: "sm" }}>
+              Upload images, tag users, and get AI-powered feedback on your designs
+            </Typography>
+
+            <Box
+              ref={chatWindowRef}
+              sx={{
+                flexGrow: 1,
+                width: "100%",
+                overflowY: "auto",
+                mb: 2,
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 1,
+              }}
+            >
+              <ChatWindow messages={messages} />
+            </Box>
+            <Box sx={{ width: "100%", mt: 2 }}>
+              <MessageInput onSendMessage={handleSendMessage} availableUsers={availableUsers} />
+            </Box>
+     
           </Box>
         </Main>
       </Box>
