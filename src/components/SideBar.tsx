@@ -43,8 +43,11 @@ const SideBar: React.FC<SideBarProps> = ({ mobileOpen, handleDrawerToggle }) => 
 
   const drawer = (
     <>
-      <Toolbar>
-        <IconButton onClick={isMobile ? handleDrawerToggle : handleCollapseToggle}>
+      <Toolbar sx={{ display: "flex", justifyContent: "center", padding: 0 }}>
+        <IconButton
+          onClick={isMobile ? handleDrawerToggle : handleCollapseToggle}
+          sx={{ width: "100%", height: "100%", borderRadius: 0 }}
+        >
           {isMobile ? <ChevronLeftIcon /> : isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
         </IconButton>
       </Toolbar>
