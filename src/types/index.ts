@@ -1,22 +1,14 @@
+// types/index.ts
 export interface Message {
-  id: string;
+  id?: string;
   content: string;
-  sender: string;
-  timestamp: Date;
-  attachments?: {
-    type: 'image' | 'url';
-    content: string;
-  }[];
-  tags?: string[];
+  sender: 'user' | 'ai';
+  timestamp?: number;
   isAiResponse?: boolean;
+  attachments?: Attachment[];
 }
 
-export interface User {
-  id: string;
-  name: string;
-  preferences: {
-    tone: 'formal' | 'casual' | 'friendly';
-    responseStyle: 'detailed' | 'concise';
-    expertise: string[];
-  };
+export interface Attachment {
+  type: 'image' | 'url';
+  content: string;
 }
