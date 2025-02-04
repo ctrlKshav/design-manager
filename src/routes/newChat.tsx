@@ -84,7 +84,7 @@ export const Route = createFileRoute("/newChat")({
           id: msg.id,
           content: msg.text,
           timestamp: msg.created_at,
-          sender: msg.sender_id === thread.user_id ? 'user' : 'ai',
+          sender: msg.sender_id === thread.user_id ? 'user' : 'ai' as "user" | "ai",
           user: {
             id: msg.sender_id,
             name: msg.sender_id === thread.user_id ? 'You' : 'AI Assistant',
@@ -97,7 +97,7 @@ export const Route = createFileRoute("/newChat")({
           id: lastMessage.id,
           content: lastMessage.text,
           timestamp: lastMessage.created_at,
-          sender: lastMessage.sender_id === thread.user_id ? 'user' : 'ai',
+          sender: lastMessage.sender_id === thread.user_id ? 'user' : 'ai' as "user" | "ai",
           user: {
             id: lastMessage.sender_id,
             name: lastMessage.sender_id === thread.user_id ? 'You' : 'AI Assistant',

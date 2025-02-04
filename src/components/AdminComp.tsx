@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { Grid, ThemeProvider, createTheme, CircularProgress, Box } from '@mui/material';
+import { ThemeProvider, createTheme, CircularProgress, Box } from '@mui/material';
+import Grid2 from '@mui/material/Grid';
 // import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConversationList } from '@/components/ConversationList/ConversationList';
 import { ConversationDetail } from '@/components/ConversationDetail/ConversationDetail';
@@ -160,11 +161,12 @@ function AdminComp() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Grid container sx={{ height: '100vh' }}>
-        <Grid 
-          item 
-          xs={12} 
-          md={4} 
+      <Grid2 container sx={{ height: '100vh' }}>
+        <Grid2
+          component="div"
+          item={true}
+          xs={12}
+          md={4}
           sx={{ 
             borderRight: 1, 
             borderColor: 'divider',
@@ -173,8 +175,8 @@ function AdminComp() {
           }}
         >
           <ConversationList conversations={conversations} />
-        </Grid>
-        <Grid 
+        </Grid2>
+        <Grid2 
           item 
           xs={12} 
           md={8} 
@@ -184,8 +186,8 @@ function AdminComp() {
           }}
         >
           <ConversationDetail />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </ThemeProvider>
   );
 }
