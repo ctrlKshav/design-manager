@@ -22,7 +22,6 @@ export const ConversationDetail: React.FC = () => {
 
   const handleSubmit = () => {
     if (comment.trim()) {
-      // TODO: Implement sending message
       setSnackbarOpen(true);
       setComment('');
     }

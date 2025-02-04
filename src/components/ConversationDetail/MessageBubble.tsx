@@ -21,7 +21,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       }}
     >
       <Tooltip
-        title={formatDistanceToNow(new Date(message.timestamp), {
+        title={formatDistanceToNow(new Date(message.timestamp ? message.timestamp : 0), {
           addSuffix: true,
         })}
       >

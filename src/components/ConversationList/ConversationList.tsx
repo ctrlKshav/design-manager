@@ -9,7 +9,7 @@ import {
 import { FixedSizeList } from 'react-window';
 import { Search } from 'lucide-react';
 import { ConversationItem } from './ConversationItem';
-import type { Conversation } from '@/types';
+import type { Conversation } from '@/types/conversation';
 import { useStore } from '@/store/useStore';
 
 interface ConversationListProps {

@@ -8,7 +8,7 @@ import {
   Badge,
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
-import type { Conversation } from '@/types';
+import type { Conversation } from '@/types/conversation';
 
 interface ConversationItemProps {
   conversation: Conversation;
