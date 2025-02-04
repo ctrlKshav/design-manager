@@ -311,7 +311,7 @@ function ChatInterface() {
           <Paper
             elevation={0}
             sx={{
-              height: "85vh",
+              height: "100vh",
               display: "flex",
               flexDirection: "column",
               border: "1px solid",
@@ -389,19 +389,8 @@ function ChatInterface() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 2,
-                "&::-webkit-scrollbar": {
-                  width: "8px",
-                },
-                "&::-webkit-scrollbar-track": {
-                  background: alpha("#f1f5f9", 0.5),
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  background: alpha("#6366f1", 0.2),
-                  borderRadius: "4px",
-                  "&:hover": {
-                    background: alpha("#6366f1", 0.3),
-                  },
-                },
+                position: 'relative',
+                pb: 8
               }}
             >
               {selectedConversation ? (
@@ -625,7 +614,32 @@ function ChatInterface() {
                     p: 2,
                     borderTop: '1px solid',
                     borderColor: alpha('#6366f1', 0.2),
-                    bgcolor: alpha('#fff', 0.9),
+                    background: `linear-gradient(135deg, ${alpha("#fff", 0.9)} 0%, ${alpha(
+                      "#f3f4f6",
+                      0.9
+                    )} 100%)`,
+                    backdropFilter: "blur(8px)",
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1,
+                    width: '100%',
+                    margin: 0,
+                    boxShadow: `0 -4px 6px -1px ${alpha("#6366f1", 0.05)}`,
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: `
+                        radial-gradient(circle at top left, ${alpha("#818cf8", 0.05)} 0%, transparent 25%),
+                        radial-gradient(circle at bottom right, ${alpha("#ec4899", 0.05)} 0%, transparent 25%)
+                      `,
+                      pointerEvents: 'none',
+                    }
                   }}
                 >
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
@@ -802,7 +816,32 @@ function ChatInterface() {
                       p: 2,
                       borderTop: '1px solid',
                       borderColor: alpha('#6366f1', 0.2),
-                      bgcolor: alpha('#fff', 0.9),
+                      background: `linear-gradient(135deg, ${alpha("#fff", 0.9)} 0%, ${alpha(
+                        "#f3f4f6",
+                        0.9
+                      )} 100%)`,
+                      backdropFilter: "blur(8px)",
+                      position: 'fixed',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 1,
+                      width: '100%',
+                      margin: 0,
+                      boxShadow: `0 -4px 6px -1px ${alpha("#6366f1", 0.05)}`,
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: `
+                          radial-gradient(circle at top left, ${alpha("#818cf8", 0.05)} 0%, transparent 25%),
+                          radial-gradient(circle at bottom right, ${alpha("#ec4899", 0.05)} 0%, transparent 25%)
+                        `,
+                        pointerEvents: 'none',
+                      }
                     }}
                   >
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
