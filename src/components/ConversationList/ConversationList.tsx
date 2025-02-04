@@ -56,7 +56,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({ conversation
         </Typography>
         <TextField
           fullWidth
-          placeholder="Search conversations..."
+          placeholder="  Search conversations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{

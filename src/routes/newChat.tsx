@@ -374,6 +374,7 @@ function ChatInterface() {
                   alignItems: "center",
                   gap: 1.5,
                   textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                  fontFamily: 'Outfit, Sans Serif'
                 }}
               >
                 <MessageSquare size={24} />
