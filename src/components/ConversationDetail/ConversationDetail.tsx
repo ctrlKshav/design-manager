@@ -67,6 +67,7 @@ export const ConversationDetail: React.FC = () => {
             ...conv,
             messages: [...conv.messages, newMessage],
             lastMessage: newMessage,
+            status: 'reviewed' as const // Update status when admin replies
           };
         }
         return conv;

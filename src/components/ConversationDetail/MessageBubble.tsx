@@ -23,7 +23,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       }}
     >
       <Tooltip
-        title={formatDistanceToNow(new Date(message.timestamp ? message.timestamp : 0), {
+        title={formatDistanceToNow(new Date(message.timestamp), {
           addSuffix: true,
         })}
       >
@@ -36,18 +36,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             borderRadius: 2,
           }}
         >
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              display: 'block', 
-              mb: 0.5,
-              color: 'text.secondary',
-              fontFamily: 'Outfit, Sans Serif'
-            }}
-          >
+          <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: 'text.secondary' }}>
             {isAdmin ? 'Admin' : isAI ? 'AI Assistant' : 'User'}
           </Typography>
-          <Typography variant="body1" sx={{fontFamily: 'Outfit, Sans Serif' }}>
+          <Typography variant="body1">
             {message.content}
           </Typography>
         </Paper>
