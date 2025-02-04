@@ -8,45 +8,6 @@ import supabase from '@/utils/supabase';
 import type { Conversation } from '@/types/conversation';
 import { useStore } from '@/store/useStore';
 
-// Sample data - replace with actual API calls
-const mockConversations = [
-  {
-    id: '1',
-    designer: {
-      id: 'designer1',
-      name: 'Alice Johnson',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-    },
-    messages: [
-      {
-        id: 'm1',
-        content: 'Here is the initial feedback for your design.',
-        timestamp: new Date().toISOString(),
-        sender: 'ai',
-        user: {
-          id: 'ai1',
-          name: 'AI Assistant',
-          avatar: '',
-        },
-        isRead: false,
-      },
-    ],
-    status: 'new',
-    lastMessage: {
-      id: 'm1',
-      content: 'Here is the initial feedback for your design.',
-      timestamp: new Date().toISOString(),
-      sender: 'ai',
-      user: {
-        id: 'ai1',
-        name: 'AI Assistant',
-        avatar: '',
-      },
-      isRead: false,
-    },
-    unreadCount: 1,
-  },
-] as const;
 
 const theme = createTheme({
   palette: {
@@ -69,33 +30,52 @@ function AdminComp() {
   useEffect(() => {
     const fetchThreads = async () => {
       try {
-        // Step 1: Fetch conversation threads using admin_id
+        console.log('Fetching threads for admin:', user?.id);
+        
         const { data: threadsData, error: threadsError } = await supabase
-          .from('conversation_threads')
+          .from('threads')
           .select(`
             id,
-            user_id
-            `)
+            user_id,
+            admin_id
+          `)
           .eq('admin_id', user?.id);
 
-        if (threadsError) throw threadsError;
+        console.log('Threads data:', threadsData);
+        console.log('Threads error:', threadsError);
 
-        // Step 2: Fetch messages for each thread
+        if (threadsError) throw threadsError;
+        if (!threadsData || threadsData.length === 0) {
+          console.log('No threads found');
+          setConversations([]);
+          useStore.getState().setConversations([]);
+          setLoading(false);
+          return;
+        }
+
         const threadIds = threadsData.map(thread => thread.id);
+        console.log('Thread IDs:', threadIds);
+
         const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
           .select(`
             id,
-            text,
-            created_at,
-            sender_id,
-            thread_id
+            thread_id,
+            user_id,
+            admin_id,
+            role,
+            content,
+            uploaded_content_url,
+            created_at
           `)
           .in('thread_id', threadIds);
 
+        console.log('Messages data:', messagesData);
+        console.log('Messages error:', messagesError);
+
         if (messagesError) throw messagesError;
 
-        // Step 3: Transform the data into the Conversation format
+        // Transform the data into the Conversation format
         const formattedConversations = threadsData.map((thread) => {
           const threadMessages = messagesData.filter(msg => msg.thread_id === thread.id);
           const lastMessage = threadMessages[threadMessages.length - 1];
@@ -103,32 +83,43 @@ function AdminComp() {
           return {
             id: thread.id,
             designer: {
-              id: 'designer_id_placeholder', // Replace with actual designer ID if available
-              name: 'designer_name_placeholder', // Replace with actual designer name if available
-              avatar: 'designer_avatar_placeholder', // Replace with actual designer avatar if available
+              id: thread.user_id,
+              name: 'User', // We can update this if we have user details
+              avatar: '',
             },
             messages: threadMessages.map((msg) => ({
-              id: msg.id,
-              content: msg.text,
+              id: msg.id.toString(),
+              content: msg.content,
               timestamp: msg.created_at,
-              sender: msg.sender_id,
+              role: msg.role as 'user' | 'admin' | 'ai' | 'system',
               user: {
-                id: thread.user_id,
-                name: msg.sender_id === 'ai' ? 'AI Assistant' : 'User Name Placeholder', // Replace with actual user name if available
-                avatar: msg.sender_id === 'ai' ? '' : 'User Avatar Placeholder', // Replace with actual user avatar if available
+                id: msg.user_id || msg.admin_id || 'ai',
+                name: msg.role === 'admin' ? 'Admin' : msg.role === 'ai' ? 'AI Assistant' : 'User',
+                avatar: '',
               },
               isRead: true,
             })),
-            status: 'new' as 'new', // Ensure status is of type 'new'
-            lastMessage: {
+            status: 'new' as const,
+            lastMessage: lastMessage ? {
               id: lastMessage.id,
-              content: lastMessage.text,
+              content: lastMessage.content,
               timestamp: lastMessage.created_at,
-              sender: lastMessage.sender_id,
+              role: lastMessage.role as 'user' | 'admin' | 'ai' | 'system',
               user: {
-                id: thread.user_id,
-                name: lastMessage.sender_id === 'ai' ? 'AI Assistant' : 'User Name Placeholder', // Replace with actual user name if available
-                avatar: lastMessage.sender_id === 'ai' ? '' : 'User Avatar Placeholder', // Replace with actual user avatar if available
+                id: lastMessage.user_id || lastMessage.admin_id || 'ai',
+                name: lastMessage.role === 'admin' ? 'Admin' : lastMessage.role === 'ai' ? 'AI Assistant' : 'User',
+                avatar: '',
+              },
+              isRead: true,
+            } : {
+              id: '0',
+              content: 'No messages yet',
+              timestamp: new Date().toISOString(),
+              role: 'system' as 'system',
+              user: {
+                id: 'system',
+                name: 'System',
+                avatar: '',
               },
               isRead: true,
             },
@@ -139,7 +130,7 @@ function AdminComp() {
         setConversations(formattedConversations);
         useStore.getState().setConversations(formattedConversations);
       } catch (error) {
-        console.error('Error fetching threads:', error);
+        console.error('Error in fetchThreads:', error);
       } finally {
         setLoading(false);
       }

@@ -2,21 +2,23 @@ import React from 'react';
 import { Box, Typography, Tooltip, Paper, IconButton } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle } from 'lucide-react';
-import type { Message } from '@/types';
+import type { Message } from '@/types/conversation';
 
 interface MessageBubbleProps {
   message: Message;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isAI = message.sender === 'ai';
+  const isUser = message.role === 'user';
+  const isAdmin = message.role === 'admin';
+  const isAI = message.role === 'ai';
 
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: isAI ? 'flex-start' : 'flex-end',
+        alignItems: isUser ? 'flex-end' : 'flex-start',
         mb: 2,
       }}
     >
@@ -30,10 +32,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           sx={{
             p: 2,
             maxWidth: '70%',
-            bgcolor: isAI ? 'primary.light' : 'secondary.light',
+            bgcolor: isAdmin ? 'success.light' : isAI ? 'primary.light' : 'secondary.light',
             borderRadius: 2,
           }}
         >
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              display: 'block', 
+              mb: 0.5,
+              color: 'text.secondary',
+              fontFamily: 'Outfit, Sans Serif'
+            }}
+          >
+            {isAdmin ? 'Admin' : isAI ? 'AI Assistant' : 'User'}
+          </Typography>
           <Typography variant="body1" sx={{fontFamily: 'Outfit, Sans Serif' }}>
             {message.content}
           </Typography>

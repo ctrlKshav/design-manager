@@ -25,8 +25,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   return (
     <ListItem
-      button
-      selected={selected}
       onClick={onClick}
       sx={{
         '&.Mui-selected': {
