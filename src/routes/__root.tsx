@@ -13,9 +13,6 @@ function RootComponent() {``
     <>
       {/* <Navbar /> */}
       <Outlet />
-      {process.env.NODE_ENV === "development" && (
-        <TanStackRouterDevtools position="bottom-right" />
-      )}
     </>
   )
 }
