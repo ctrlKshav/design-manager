@@ -199,7 +199,7 @@ function ChatInterface() {
 
   // Update store with conversations from loader
   React.useEffect(() => {
-    setConversations(conversations);
+    setConversations(conversations as Conversation[]);
   }, [conversations, setConversations]);
 
   // Add this effect to clear the chat store when selecting an existing conversation
