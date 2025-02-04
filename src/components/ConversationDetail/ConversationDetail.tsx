@@ -13,6 +13,7 @@ import { MessageBubble } from './MessageBubble';
 import { useStore } from '@/store/useStore';
 import supabase from '@/utils/supabase';
 import { useLoaderData } from '@tanstack/react-router';
+import ReactMarkdown from 'react-markdown';
 
 export const ConversationDetail: React.FC = () => {
   const { selectedConversationId } = useStore();
@@ -121,7 +122,10 @@ export const ConversationDetail: React.FC = () => {
           {selectedConversation.messages.map((message) => (
             <MessageBubble 
               key={message.id}
-              message={message}
+              message={{
+                ...message,
+                content: <ReactMarkdown>{message.content}</ReactMarkdown>
+              }}
             />
           ))}
         </Stack>

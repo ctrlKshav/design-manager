@@ -5,6 +5,7 @@ import { Box, Typography, Paper, CircularProgress, Alert } from "@mui/material";
 import supabase from '@/utils/supabase';
 import type { Message } from "@/types";
 import { useLoaderData } from '@tanstack/react-router';
+import ReactMarkdown from 'react-markdown';
 
 export default function AdminPage() {
   const [threads, setThreads] = useState<any[]>([]);
@@ -133,9 +134,15 @@ export default function AdminPage() {
                         mb: 1,
                       }}
                     >
-                      <Typography variant="body1">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <Typography variant="body1" {...props} />
+                          ),
+                        }}
+                      >
                         {message.text}
-                      </Typography>
+                      </ReactMarkdown>
                     </Paper>
                   ))}
                 </Box>

@@ -9,7 +9,6 @@ import supabase from '@/utils/supabase';
 import type { Conversation } from '@/types/conversation';
 import { useStore } from '@/store/useStore';
 
-
 const theme = createTheme({
   palette: {
     primary: {

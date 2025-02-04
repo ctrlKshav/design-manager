@@ -32,6 +32,7 @@ import supabase from "@/utils/supabase";
 import { ChatLayout } from '@/components/ChatLayout';
 import { useStore } from '@/store/useStore';
 import type { Conversation } from '@/types/conversation';
+import ReactMarkdown from 'react-markdown';
 
 export const Route = createFileRoute("/newChat")({
   component: ChatInterface,
@@ -94,6 +95,7 @@ export const Route = createFileRoute("/newChat")({
           },
           isRead: true,
           role: msg.role,
+          attachments: []
         })),
         status: 'new',
         lastMessage: lastMessage ? {
@@ -443,16 +445,24 @@ function ChatInterface() {
                                 : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                             }}
                           >
-                            <Typography
-                              variant="body1"
-                              sx={{
-                                lineHeight: 1.7,
-                                letterSpacing: "-0.01em",
-                                wordBreak: "break-word",
+                            <ReactMarkdown
+                              components={{
+                                p: ({ node, ...props }) => (
+                                  <Typography
+                                    variant="body1"
+                                    sx={{
+                                      lineHeight: 1.7,
+                                      letterSpacing: "-0.01em",
+                                      wordBreak: "break-word",
+                                      mb: message.attachments?.length ? 2 : 0,
+                                    }}
+                                    {...props}
+                                  />
+                                ),
                               }}
                             >
                               {message.content}
-                            </Typography>
+                            </ReactMarkdown>
                           </Paper>
                         </Box>
                         <Typography
@@ -540,17 +550,24 @@ function ChatInterface() {
                                   : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                               }}
                             >
-                              <Typography
-                                variant="body1"
-                                sx={{
-                                  lineHeight: 1.7,
-                                  letterSpacing: "-0.01em",
-                                  wordBreak: "break-word",
-                                  mb: message.attachments?.length ? 2 : 0,
+                              <ReactMarkdown
+                                components={{
+                                  p: ({ node, ...props }) => (
+                                    <Typography
+                                      variant="body1"
+                                      sx={{
+                                        lineHeight: 1.7,
+                                        letterSpacing: "-0.01em",
+                                        wordBreak: "break-word",
+                                        mb: message.attachments?.length ? 2 : 0,
+                                      }}
+                                      {...props}
+                                    />
+                                  ),
                                 }}
                               >
                                 {message.content}
-                              </Typography>
+                              </ReactMarkdown>
 
                               {message.attachments?.map((attachment, index) => (
                                 attachment.type === "image" && (
