@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as NewChatImport } from './routes/newChat'
 import { Route as ChatImport } from './routes/chat'
+import { Route as AdminRouteImport } from './routes/admin-route'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
@@ -27,6 +28,12 @@ const NewChatRoute = NewChatImport.update({
 const ChatRoute = ChatImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminRouteRoute = AdminRouteImport.update({
+  id: '/admin-route',
+  path: '/admin-route',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/admin-route': {
+      id: '/admin-route'
+      path: '/admin-route'
+      fullPath: '/admin-route'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -82,6 +96,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-route': typeof AdminRouteRoute
   '/chat': typeof ChatRoute
   '/newChat': typeof NewChatRoute
 }
@@ -89,6 +104,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-route': typeof AdminRouteRoute
   '/chat': typeof ChatRoute
   '/newChat': typeof NewChatRoute
 }
@@ -97,22 +113,24 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-route': typeof AdminRouteRoute
   '/chat': typeof ChatRoute
   '/newChat': typeof NewChatRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/chat' | '/newChat'
+  fullPaths: '/' | '/about' | '/admin-route' | '/chat' | '/newChat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/chat' | '/newChat'
-  id: '__root__' | '/' | '/about' | '/chat' | '/newChat'
+  to: '/' | '/about' | '/admin-route' | '/chat' | '/newChat'
+  id: '__root__' | '/' | '/about' | '/admin-route' | '/chat' | '/newChat'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRouteRoute: typeof AdminRouteRoute
   ChatRoute: typeof ChatRoute
   NewChatRoute: typeof NewChatRoute
 }
@@ -120,6 +138,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRouteRoute: AdminRouteRoute,
   ChatRoute: ChatRoute,
   NewChatRoute: NewChatRoute,
 }
@@ -136,6 +155,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
+        "/admin-route",
         "/chat",
         "/newChat"
       ]
@@ -145,6 +165,9 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/admin-route": {
+      "filePath": "admin-route.tsx"
     },
     "/chat": {
       "filePath": "chat.tsx"

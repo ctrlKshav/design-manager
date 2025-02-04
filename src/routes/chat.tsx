@@ -62,7 +62,8 @@ export default function ChatInterface() {
   }, [chatWindowRef])
 
   return (
-    <ThemeProvider theme={theme}>
+    // <ThemeProvider theme={theme}>
+    <>
       <CssBaseline />
       <Box sx={{ display: "flex", bgcolor: red }}>
         <SideBar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
@@ -122,6 +123,7 @@ export default function ChatInterface() {
           </Box>
         </Main>
       </Box>
-    </ThemeProvider>
+    {/* </ThemeProvider> */}
+    </>
   )
 }

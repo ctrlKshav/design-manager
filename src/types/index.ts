@@ -4,7 +4,6 @@ export interface Message {
   content: string;
   sender: 'user' | 'ai';
   timestamp?: number;
-  isAiResponse?: boolean;
   attachments?: Attachment[];
 }
 

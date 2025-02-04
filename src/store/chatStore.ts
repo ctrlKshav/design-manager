@@ -1,5 +1,3 @@
-
-
 // store/chatStore.ts
 import { create } from 'zustand';
 import { Message } from '@/types';

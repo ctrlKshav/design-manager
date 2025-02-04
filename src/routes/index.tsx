@@ -12,6 +12,8 @@ function HomeComponent() {
       <Link to='/chat'>ChatBot</Link>
       <br />
       <Link to='/newChat'>NewChatBot</Link>
+      <br />
+      <Link to='/admin-route'>Admin</Link>
     </div>
   )
 }

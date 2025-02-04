@@ -23,13 +23,22 @@ import {
   Trash2,
   X,
   MessageSquare,
+  Save,
 } from "lucide-react";
 import { useChatStore } from "@/store/chatStore";
 import type { Message } from "@/types";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import supabase from "@/utils/supabase";
 
 export const Route = createFileRoute("/newChat")({
   component: ChatInterface,
+  loader:async () => {
+    const {data, error} = await supabase.auth.signInWithPassword({
+      email: "user@gmail.com",
+      password: "realuser"
+    })
+    return data;
+  }
 });
 
 async function sendImageAndQuestion(imageFile: File, question: string) {
@@ -54,6 +63,49 @@ async function sendImageAndQuestion(imageFile: File, question: string) {
   }
 }
 
+async function saveConversationToSupabase(messages: Message[], user: any) {
+  try {
+    // Fetch the admin ID using the admin's email
+    const adminEmail = "admin@gmail.com"; // Replace with the actual admin email
+    const { data: adminData, error: adminError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', adminEmail)
+      .single();
+
+    if (adminError || !adminData) throw new Error('Admin not found');
+
+    // First create a conversation thread with admin_id
+    const { data: threadData, error: threadError } = await supabase
+      .from('conversation_threads')
+      .insert([{ user_id: user?.id, admin_id: adminData.id }])
+      .select()
+      .single();
+
+    if (threadError) throw threadError;
+
+    // Then save all messages
+    const messagesForDb = messages.map(msg => ({
+      thread_id: threadData.id,
+      text: msg.content,
+      uploaded_image_url: msg.attachments?.[0]?.content,
+      created_at: msg.timestamp ? new Date(msg.timestamp).toISOString() : new Date().toISOString(),
+      sender_id: msg.sender === 'user' ? user?.id : null
+    }));
+
+    const { error: messagesError } = await supabase
+      .from('messages')
+      .insert(messagesForDb);
+
+    if (messagesError) throw messagesError;
+
+    return threadData.id;
+  } catch (error) {
+    console.error('Error saving conversation:', error);
+    throw error;
+  }
+}
+
 function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +115,10 @@ function ChatInterface() {
   const { messages, addMessage, clearChat } = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showSaveButton, setShowSaveButton] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user : user} = useLoaderData({ from: "/newChat" });
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,6 +126,12 @@ function ChatInterface() {
 
   React.useEffect(() => {
     scrollToBottom();
+  }, [messages]);
+
+  React.useEffect(() => {
+    if (messages.length > 0 && !showSaveButton) {
+      setShowSaveButton(true);
+    }
   }, [messages]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -105,7 +167,6 @@ function ChatInterface() {
       const aiMessage: Omit<Message, "id" | "timestamp"> = {
         content: analysis.response,
         sender: "ai",
-        isAiResponse: true,
       };
 
       // Add AI response to UI
@@ -139,6 +200,20 @@ function ChatInterface() {
 
       setSelectedFile(file);
       setError("");
+    }
+  };
+
+  const handleSaveConversation = async () => {
+    setIsSaving(true);
+    try {
+      await saveConversationToSupabase(messages,  user);
+      // Show success message
+      setError("Conversation saved successfully!");
+      setTimeout(() => setError(""), 3000);
+    } catch (err) {
+      setError("Failed to save conversation. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -484,6 +559,33 @@ function ChatInterface() {
                     </IconButton>
                   </Tooltip>
                 </motion.div>
+
+                {showSaveButton && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Tooltip title="Save conversation">
+                      <IconButton
+                        onClick={handleSaveConversation}
+                        disabled={isSaving}
+                        sx={{
+                          p: 1.25,
+                          color: '#10b981',
+                          '&:hover': {
+                            bgcolor: alpha('#10b981', 0.1),
+                          },
+                        }}
+                      >
+                        {isSaving ? (
+                          <CircularProgress size={20} sx={{ color: '#10b981' }} />
+                        ) : (
+                          <Save size={20} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  </motion.div>
+                )}
 
                 <motion.div
                   whileHover={{ scale: 1.05 }}
