@@ -49,15 +49,17 @@ export const Route = createFileRoute("/newChat")({
 
     // Then fetch user's conversations
     const { data: threadsData, error: threadsError } = await supabase
-      .from('conversation_threads')
+      .from('threads')
       .select(`
         id,
         user_id,
         messages (
           id,
-          text,
+          content,
           created_at,
-          sender_id,
+          user_id,
+          admin_id,
+          role,
           thread_id
         )
       `)
@@ -82,25 +84,25 @@ export const Route = createFileRoute("/newChat")({
         },
         messages: threadMessages.map((msg) => ({
           id: msg.id,
-          content: msg.text,
+          content: msg.content,
           timestamp: msg.created_at,
           sender: msg.sender_id === thread.user_id ? 'user' : 'ai' as "user" | "ai",
           user: {
-            id: msg.sender_id,
-            name: msg.sender_id === thread.user_id ? 'You' : 'AI Assistant',
+            id: msg.user_id,
+            name: msg.role,
             avatar: '',
           },
           isRead: true,
         })),
         status: 'new',
         lastMessage: lastMessage ? {
-          id: lastMessage.id,
-          content: lastMessage.text,
+         id: lastMessage.id,
+          content: lastMessage.content,
           timestamp: lastMessage.created_at,
           sender: lastMessage.sender_id === thread.user_id ? 'user' : 'ai' as "user" | "ai",
           user: {
-            id: lastMessage.sender_id,
-            name: lastMessage.sender_id === thread.user_id ? 'You' : 'AI Assistant',
+            id: lastMessage.user_id,
+            name: lastMessage.role,
             avatar: '',
           },
           isRead: true,
@@ -149,8 +151,8 @@ async function saveConversationToSupabase(messages: Message[], user: any) {
 
     // First create a conversation thread with admin_id
     const { data: threadData, error: threadError } = await supabase
-      .from('conversation_threads')
-      .insert([{ user_id: user?.id, admin_id: adminData.id }])
+      .from('threads')
+      .insert([{ user_id: user?.id, admin_id: adminData.id , title: "New Chat"}])
       .select()
       .single();
 
@@ -159,10 +161,10 @@ async function saveConversationToSupabase(messages: Message[], user: any) {
     // Then save all messages
     const messagesForDb = messages.map(msg => ({
       thread_id: threadData.id,
-      text: msg.content,
-      uploaded_image_url: msg.attachments?.[0]?.content,
+      content: msg.content,
+      uploaded_content_url: msg.attachments?.[0]?.content,
       created_at: msg.timestamp ? new Date(msg.timestamp).toISOString() : new Date().toISOString(),
-      sender_id: msg.sender === 'user' ? user?.id : null
+      role: msg.role
     }));
 
     const { error: messagesError } = await supabase
@@ -197,7 +199,7 @@ function ChatInterface() {
 
   // Update store with conversations from loader
   React.useEffect(() => {
-    setConversations(conversations);
+    setConversations(conversations as Conversation[]);
   }, [conversations, setConversations]);
 
   // Add this effect to clear the chat store when selecting an existing conversation
@@ -241,7 +243,7 @@ function ChatInterface() {
       // Create user message
       const userMessage: Omit<Message, "id" | "timestamp"> = {
         content: input,
-        sender: "user",
+        role: "user",
       };
 
       // Add user message to UI
@@ -253,7 +255,7 @@ function ChatInterface() {
       // Create AI message
       const aiMessage: Omit<Message, "id" | "timestamp"> = {
         content: analysis.response,
-        sender: "ai",
+        role: "ai",
       };
 
       // Add AI response to UI
@@ -409,14 +411,14 @@ function ChatInterface() {
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          alignItems: message.sender === "user" ? "flex-end" : "flex-start",
+                          alignItems: message.role === "user" ? "flex-end" : "flex-start",
                           maxWidth: "100%",
                         }}
                       >
                         <Box
                           sx={{
                             display: "flex",
-                            flexDirection: message.sender === "user" ? "row-reverse" : "row",
+                            flexDirection: message.role === "user" ? "row-reverse" : "row",
                             alignItems: "flex-start",
                             gap: 1.5,
                             maxWidth: "70%",
@@ -426,15 +428,15 @@ function ChatInterface() {
                             elevation={0}
                             sx={{
                               p: 2,
-                              bgcolor: message.sender === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
-                              color: message.sender === "user" ? "white" : "text.primary",
-                              borderRadius: message.sender === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+                              bgcolor: message.role === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
+                              color: message.role === "user" ? "white" : "text.primary",
+                              borderRadius: message.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
                               position: "relative",
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 transform: "translateY(-1px)",
                               },
-                              boxShadow: message.sender === "user"
+                              boxShadow: message.role === "user"
                                 ? "0 4px 6px -1px rgba(99, 102, 241, 0.1), 0 2px 4px -2px rgba(99, 102, 241, 0.1)"
                                 : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                             }}
@@ -457,7 +459,7 @@ function ChatInterface() {
                             mt: 0.5,
                             px: 2,
                             color: alpha(
-                              message.sender === "user" ? "#6366f1" : "#64748b",
+                              message.role === "user" ? "#6366f1" : "#64748b",
                               0.8
                             ),
                             fontSize: "0.75rem",
@@ -506,14 +508,14 @@ function ChatInterface() {
                           sx={{
                             display: "flex",
                             flexDirection: "column",
-                            alignItems: message.sender === "user" ? "flex-end" : "flex-start",
+                            alignItems: message.role === "user" ? "flex-end" : "flex-start",
                             maxWidth: "100%",
                           }}
                         >
                           <Box
                             sx={{
                               display: "flex",
-                              flexDirection: message.sender === "user" ? "row-reverse" : "row",
+                              flexDirection: message.role === "user" ? "row-reverse" : "row",
                               alignItems: "flex-start",
                               gap: 1.5,
                               maxWidth: "70%",
@@ -523,15 +525,15 @@ function ChatInterface() {
                               elevation={0}
                               sx={{
                                 p: 2,
-                                bgcolor: message.sender === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
-                                color: message.sender === "user" ? "white" : "text.primary",
-                                borderRadius: message.sender === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+                                bgcolor: message.role === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
+                                color: message.role === "user" ? "white" : "text.primary",
+                                borderRadius: message.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
                                 position: "relative",
                                 transition: "all 0.2s ease-in-out",
                                 "&:hover": {
                                   transform: "translateY(-1px)",
                                 },
-                                boxShadow: message.sender === "user"
+                                boxShadow: message.role === "user"
                                   ? "0 4px 6px -1px rgba(99, 102, 241, 0.1), 0 2px 4px -2px rgba(99, 102, 241, 0.1)"
                                   : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                               }}
@@ -579,7 +581,7 @@ function ChatInterface() {
                               mt: 0.5,
                               px: 2,
                               color: alpha(
-                                message.sender === "user" ? "#6366f1" : "#64748b",
+                                message.role === "user" ? "#6366f1" : "#64748b",
                                 0.8
                               ),
                               fontSize: "0.75rem",

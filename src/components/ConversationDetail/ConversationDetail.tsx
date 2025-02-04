@@ -11,19 +11,76 @@ import {
 import { Send as SendIcon } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
 import { useStore } from '@/store/useStore';
+import supabase from '@/utils/supabase';
+import { useLoaderData } from '@tanstack/react-router';
 
 export const ConversationDetail: React.FC = () => {
   const { selectedConversationId } = useStore();
   const { conversations } = useStore();
+  const { user } = useLoaderData({ from: '/admin-route' });
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   const [comment, setComment] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (comment.trim()) {
+  const handleSubmit = async () => {
+    if (!comment.trim() || !selectedConversationId || !user?.id) return;
+
+    setIsSubmitting(true);
+    try {
+      // Insert the message into the database
+      const { data: messageData, error: messageError } = await supabase
+        .from('messages')
+        .insert([
+          {
+            thread_id: selectedConversationId,
+            admin_id: user.id,
+            role: 'admin',
+            content: comment.trim(),
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (messageError) throw messageError;
+
+      // Update the local state
+      const newMessage = {
+        id: messageData.id.toString(),
+        content: messageData.content,
+        timestamp: messageData.created_at,
+        role: 'admin' as const,
+        user: {
+          id: user.id,
+          name: 'Admin',
+          avatar: '',
+        },
+        isRead: true,
+      };
+
+      // Update the conversations in the store
+      const updatedConversations = conversations.map(conv => {
+        if (conv.id === selectedConversationId) {
+          return {
+            ...conv,
+            messages: [...conv.messages, newMessage],
+            lastMessage: newMessage,
+            status: 'reviewed' as const // Update status when admin replies
+          };
+        }
+        return conv;
+      });
+
+      useStore.getState().setConversations(updatedConversations);
       setSnackbarOpen(true);
       setComment('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Show error message to user
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,7 +166,7 @@ export const ConversationDetail: React.FC = () => {
             sx={{fontFamily: 'Montserrat, Sans Serif', ml: 1, height: '56px' }}
             endIcon={<SendIcon size={16} />}
             onClick={handleSubmit}
-            disabled={!comment.trim()}
+            disabled={!comment.trim() || isSubmitting}
           >
             Send
           </Button>

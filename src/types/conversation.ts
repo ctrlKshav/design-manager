@@ -8,7 +8,7 @@ export interface Message {
   id: string;
   content: string;
   timestamp: string;
-  sender: 'ai' | 'user';
+  role: 'ai' | 'user' | 'admin' | 'system';
   user: User;
   isRead: boolean;
 }

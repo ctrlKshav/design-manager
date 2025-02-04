@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Conversation } from '@/types';
+import type { Conversation } from '@/types/conversation';
 
 interface Store {
   selectedConversationId: string | null;
