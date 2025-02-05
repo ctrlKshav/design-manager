@@ -74,42 +74,43 @@ export const Route = createFileRoute("/newChat")({
     // Transform the data into conversations format
     const conversations = threadsData.map((thread) => {
       const threadMessages = thread.messages || [];
-      const lastMessage = threadMessages[threadMessages.length - 1];
+      
+      // Sort messages by created_at timestamp
+      const sortedMessages = threadMessages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      
+      const lastMessage = sortedMessages[sortedMessages.length - 1];
 
       return {
         id: thread.id,
         designer: {
           id: thread.user_id,
-          name: 'AI Assistant',
+          name: 'User',
           avatar: '',
         },
-        messages: threadMessages.map((msg) => ({
-          id: msg.id,
+        messages: sortedMessages.map((msg) => ({
+          id: msg.id.toString(),
           content: msg.content,
           timestamp: msg.created_at,
-          sender: msg.user_id === thread.user_id ? 'user' : 'ai',
+          role: msg.role as 'user' | 'admin' | 'ai' | 'system',
           user: {
-            id: msg.user_id,
-            name: msg.role,
+            id: msg.user_id || msg.admin_id || 'ai',
+            name: msg.role === 'admin' ? 'Admin' : msg.role === 'ai' ? 'AI Assistant' : 'User',
             avatar: '',
           },
           isRead: true,
-          role: msg.role,
-          attachments: []
         })),
-        status: 'new',
+        status: 'new' as const,
         lastMessage: lastMessage ? {
-         id: lastMessage.id,
+          id: lastMessage.id.toString(),
           content: lastMessage.content,
           timestamp: lastMessage.created_at,
-          sender: lastMessage.user_id === thread.user_id ? 'user' : 'ai',
+          role: lastMessage.role as 'user' | 'admin' | 'ai' | 'system',
           user: {
-            id: lastMessage.user_id,
-            name: lastMessage.role,
+            id: lastMessage.user_id || lastMessage.admin_id || 'ai',
+            name: lastMessage.role === 'admin' ? 'Admin' : lastMessage.role === 'ai' ? 'AI Assistant' : 'User',
             avatar: '',
           },
           isRead: true,
-          role: lastMessage.role,
         } : null,
         unreadCount: 0,
       };
@@ -488,7 +489,6 @@ function ChatInterface() {
                                       lineHeight: 1.7,
                                       letterSpacing: "-0.01em",
                                       wordBreak: "break-word",
-                                      mb: message.attachments?.length ? 2 : 0,
                                     }}
                                     {...props}
                                   />

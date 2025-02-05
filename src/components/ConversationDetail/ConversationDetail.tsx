@@ -13,7 +13,6 @@ import { MessageBubble } from './MessageBubble';
 import { useStore } from '@/store/useStore';
 import supabase from '@/utils/supabase';
 import { useLoaderData } from '@tanstack/react-router';
-import ReactMarkdown from 'react-markdown';
 
 export const ConversationDetail: React.FC = () => {
   const { selectedConversationId } = useStore();
@@ -85,6 +84,13 @@ export const ConversationDetail: React.FC = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   if (!selectedConversation) {
     return (
       <Box 
@@ -124,7 +130,7 @@ export const ConversationDetail: React.FC = () => {
               key={message.id}
               message={{
                 ...message,
-                content: <ReactMarkdown>{message.content}</ReactMarkdown>
+                content: message.content
               }}
             />
           ))}
@@ -160,6 +166,7 @@ export const ConversationDetail: React.FC = () => {
             rows={1}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder="Type your reply..."
             variant="outlined"
             sx={{ mb: 0, flexGrow: 1, height: '56px' }}

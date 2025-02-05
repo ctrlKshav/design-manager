@@ -78,7 +78,11 @@ function AdminComp() {
         // Transform the data into the Conversation format
         const formattedConversations = threadsData.map((thread) => {
           const threadMessages = messagesData.filter(msg => msg.thread_id === thread.id);
-          const lastMessage = threadMessages[threadMessages.length - 1];
+          
+          // Sort messages by created_at timestamp
+          const sortedMessages = threadMessages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          
+          const lastMessage = sortedMessages[sortedMessages.length - 1];
 
           return {
             id: thread.id,
@@ -87,7 +91,7 @@ function AdminComp() {
               name: 'User', // We can update this if we have user details
               avatar: '',
             },
-            messages: threadMessages.map((msg) => ({
+            messages: sortedMessages.map((msg) => ({
               id: msg.id.toString(),
               content: msg.content,
               timestamp: msg.created_at,
@@ -101,7 +105,7 @@ function AdminComp() {
             })),
             status: 'new' as const,
             lastMessage: lastMessage ? {
-              id: lastMessage.id,
+              id: lastMessage.id.toString(),
               content: lastMessage.content,
               timestamp: lastMessage.created_at,
               role: lastMessage.role as 'user' | 'admin' | 'ai' | 'system',

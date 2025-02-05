@@ -3,6 +3,7 @@ import { Box, Typography, Tooltip, Paper, IconButton } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle } from 'lucide-react';
 import type { Message } from '@/types/conversation';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageBubbleProps {
   message: Message;
@@ -40,7 +41,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             {isAdmin ? 'Admin' : isAI ? 'AI Assistant' : 'User'}
           </Typography>
           <Typography variant="body1">
-            {message.content}
+            <ReactMarkdown>{message.content}</ReactMarkdown>
           </Typography>
         </Paper>
       </Tooltip>
