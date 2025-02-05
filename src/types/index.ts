@@ -5,6 +5,12 @@ export interface Message {
   role: 'user' | 'ai' | 'admin' | 'system';
   timestamp?: number;
   attachments?: Attachment[];
+  user?: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  isRead?: boolean;
 }
 
 export interface Attachment {

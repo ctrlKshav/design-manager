@@ -244,10 +244,16 @@ function ChatInterface() {
     setError("");
 
     try {
-      // Create user message
+      // Create user message with role and user info
       const userMessage: Omit<Message, "id" | "timestamp"> = {
         content: input,
         role: "user",
+        user: {
+          id: user?.id || 'user',
+          name: 'User',
+          avatar: '',
+        },
+        isRead: true,
       };
 
       // Add user message to UI
@@ -256,10 +262,16 @@ function ChatInterface() {
       // Send to backend and get analysis
       const analysis = await sendImageAndQuestion(selectedFile, input);
 
-      // Create AI message
+      // Create AI message with role and user info
       const aiMessage: Omit<Message, "id" | "timestamp"> = {
         content: analysis.response,
         role: "ai",
+        user: {
+          id: 'ai',
+          name: 'AI Assistant',
+          avatar: '',
+        },
+        isRead: true,
       };
 
       // Add AI response to UI
@@ -432,8 +444,16 @@ function ChatInterface() {
                             elevation={0}
                             sx={{
                               p: 2,
-                              bgcolor: message.role === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
-                              color: message.role === "user" ? "white" : "text.primary",
+                              bgcolor: message.role === "user" 
+                                ? "primary.main" 
+                                : message.role === "admin"
+                                ? "success.light"
+                                : alpha("#f8fafc", 0.9),
+                              color: message.role === "user" 
+                                ? "white" 
+                                : message.role === "admin"
+                                ? "white"
+                                : "text.primary",
                               borderRadius: message.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
                               position: "relative",
                               transition: "all 0.2s ease-in-out",
@@ -445,6 +465,20 @@ function ChatInterface() {
                                 : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                             }}
                           >
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                display: "block",
+                                mb: 0.5,
+                                color: message.role === "user" ? alpha("#fff", 0.8) : "text.secondary",
+                              }}
+                            >
+                              {message.role === "user" 
+                                ? "User" 
+                                : message.role === "admin" 
+                                  ? "Admin" 
+                                  : "AI Assistant"}
+                            </Typography>
                             <ReactMarkdown
                               components={{
                                 p: ({ node, ...props }) => (
@@ -537,61 +571,52 @@ function ChatInterface() {
                               elevation={0}
                               sx={{
                                 p: 2,
-                                bgcolor: message.role === "user" ? "primary.main" : alpha("#f8fafc", 0.9),
-                                color: message.role === "user" ? "white" : "text.primary",
+                                bgcolor: message.role === "user" 
+                                  ? "primary.main" 
+                                  : message.role === "admin"
+                                  ? "success.light"
+                                  : alpha("#f8fafc", 0.9),
+                                color: message.role === "user" 
+                                  ? "white" 
+                                  : message.role === "admin"
+                                  ? "success.dark"
+                                  : "text.primary",
                                 borderRadius: message.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
                                 position: "relative",
-                                transition: "all 0.2s ease-in-out",
-                                "&:hover": {
-                                  transform: "translateY(-1px)",
-                                },
-                                boxShadow: message.role === "user"
-                                  ? "0 4px 6px -1px rgba(99, 102, 241, 0.1), 0 2px 4px -2px rgba(99, 102, 241, 0.1)"
-                                  : "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
                               }}
                             >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  display: "block",
+                                  mb: 0.5,
+                                  color: message.role === "user" ? alpha("#fff", 0.8) : "text.secondary",
+                                }}
+                              >
+                                {message.role === "user" 
+                                  ? "User" 
+                                  : message.role === "admin" 
+                                    ? "Admin" 
+                                    : "AI Assistant"}
+                              </Typography>
                               <ReactMarkdown
                                 components={{
                                   p: ({ node, ...props }) => (
-                                    <Typography
-                                      variant="body1"
-                                      sx={{
-                                        lineHeight: 1.7,
-                                        letterSpacing: "-0.01em",
-                                        wordBreak: "break-word",
-                                        mb: message.attachments?.length ? 2 : 0,
-                                      }}
-                                      {...props}
-                                    />
-                                  ),
-                                }}
+                                  <Typography
+                                    variant="body1"
+                                    sx={{
+                                      lineHeight: 1.7,
+                                      letterSpacing: "-0.01em",
+                                      wordBreak: "break-word",
+                                      mb: message.attachments?.length ? 2 : 0,
+                                    }}
+                                    {...props}
+                                  />
+                                ),
+                              }}
                               >
                                 {message.content}
                               </ReactMarkdown>
-
-                              {message.attachments?.map((attachment, index) => (
-                                attachment.type === "image" && (
-                                  <Box
-                                    key={index}
-                                    sx={{
-                                      mt: message.content ? 2 : 0,
-                                      borderRadius: 2,
-                                      overflow: "hidden",
-                                    }}
-                                  >
-                                    <img
-                                      src={attachment.content}
-                                      alt="Uploaded content"
-                                      style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "200px",
-                                        objectFit: "cover",
-                                        borderRadius: "8px",
-                                      }}
-                                    />
-                                  </Box>
-                                )
-                              ))}
                             </Paper>
                           </Box>
                           <Typography
